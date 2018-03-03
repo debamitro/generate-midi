@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <fstream>
 #include <vector>
 
@@ -6,7 +7,26 @@ public:
     MidiFile(const char* fileName);
     ~MidiFile();
 
-    void add_note(unsigned char key, unsigned char duration = 0x08);
+    using Note = uint8_t;
+    static const Note SA = 0x3C;
+    static const Note _RE = 0x3D;
+    static const Note RE = 0x3E;
+    static const Note _GA = 0x3F;
+    static const Note GA = 0x40;
+    static const Note MA = 0x41;
+    static const Note MA_ = 0x42;
+    static const Note PA = 0x43;
+    static const Note _DHA = 0x44;
+    static const Note DHA = 0x45;
+    static const Note _NI = 0x46;
+    static const Note NI = 0x47;
+
+    using Duration = uint8_t;
+    static const Duration QUARTER = 0x02;
+    static const Duration HALF = 0x04;
+    static const Duration ONE = 0x08;
+
+    void add_note(Note key, int octave = 0, Duration duration = ONE);
     void generate();
 
 private:
@@ -46,13 +66,13 @@ private:
 int main()
 {
     MidiFile midiFile("out.mid");
-    midiFile.add_note(0x3B);
-    midiFile.add_note(0x3E);
-    midiFile.add_note(0x40);
-    midiFile.add_note(0x3C, 0x02);
-    midiFile.add_note(0x3B, 0x02);
-    midiFile.add_note(0x3E, 0x02);
-    midiFile.add_note(0x3C, 0x10);
+    midiFile.add_note(MidiFile::NI, -1);
+    midiFile.add_note(MidiFile::RE);
+    midiFile.add_note(MidiFile::GA);
+    midiFile.add_note(MidiFile::SA, 0, MidiFile::QUARTER);
+    midiFile.add_note(MidiFile::NI, -1, MidiFile::QUARTER);
+    midiFile.add_note(MidiFile::RE, 0, MidiFile::QUARTER);
+    midiFile.add_note(MidiFile::SA, 0, MidiFile::ONE * (uint8_t)2);
     midiFile.generate();
 
     return 0;
@@ -75,10 +95,10 @@ void MidiFile::generate()
     write_tracks();
 }
 
-void MidiFile::add_note(const unsigned char key, const unsigned char duration)
+void MidiFile::add_note(const Note key, const int octave, const Duration duration)
 {
-    tracks[0].events.emplace_back(Event(0x00, 0x90, key, 0x40));
-    tracks[0].events.emplace_back(Event(duration, 0x80, key, 0x40));
+    tracks[0].events.emplace_back(Event(0x00, 0x90, key + (uint8_t)(octave * 12), 0x40));
+    tracks[0].events.emplace_back(Event(duration, 0x80, key + (uint8_t)(octave * 12), 0x40));
 }
 
 void MidiFile::write_header()
