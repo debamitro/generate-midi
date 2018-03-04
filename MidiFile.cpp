@@ -26,15 +26,14 @@ void MidiFile::add_note(const Note key, const int octave, const Duration duratio
     tracks[0].events.emplace_back(Event(duration, 0x80, key + (uint8_t)(octave * 12), 0x20));
 }
 
+static void write_int_as_big_endian (unsigned int n, std::ofstream& file);
+
 void MidiFile::write_header()
 {
     file.write("MThd", 4);
 
     // length
-    file.put(0);
-    file.put(0);
-    file.put(0);
-    file.put(6);
+    write_int_as_big_endian (6, file);
 
     // data
     // format - 2 bytes
@@ -55,15 +54,21 @@ void MidiFile::write_tracks()
     }
 }
 
+unsigned int MidiFile::Track::size() const
+{
+    // 3 bytes for instrument setting event
+    // 4 bytes each for every note on or note off event
+    // 4 bytes for end of track event
+    return 3 + events.size() * 4 + 4;
+}
+
+
 void MidiFile::Track::write_to(std::ofstream& file) const
 {
     file.write("MTrk", 4);
 
     // length
-    file.put(0);
-    file.put(0);
-    file.put(0);
-    file.put(3+events.size()*4+4);
+    write_int_as_big_endian(size(), file);
 
     file.put(0x00);
     file.put(0xC0);
@@ -86,4 +91,12 @@ void MidiFile::Event::write_to(std::ofstream& file) const
     file.put(status_);
     file.put(data1_);
     file.put(data2_);
+}
+
+static void write_int_as_big_endian (const unsigned int n, std::ofstream& file)
+{
+    file.put((n >> 24) & 0xFF);
+    file.put((n >> 16) & 0xFF);
+    file.put((n >> 8) & 0xFF);
+    file.put(n & 0xFF);
 }
