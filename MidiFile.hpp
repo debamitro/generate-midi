@@ -11,18 +11,18 @@ public:
     ~MidiFile();
 
     using Note = uint8_t;
-    static const Note SA = 0x3C;
-    static const Note _RE = 0x3D;
-    static const Note RE = 0x3E;
-    static const Note _GA = 0x3F;
-    static const Note GA = 0x40;
-    static const Note MA = 0x41;
-    static const Note MA_ = 0x42;
-    static const Note PA = 0x43;
-    static const Note _DHA = 0x44;
-    static const Note DHA = 0x45;
-    static const Note _NI = 0x46;
-    static const Note NI = 0x47;
+    static const Note SA = 0x3D; // Middle C-sharp
+    static const Note _RE = SA + 1;
+    static const Note RE = SA + 2;
+    static const Note _GA = SA + 3;
+    static const Note GA = SA + 4;
+    static const Note MA = SA + 5;
+    static const Note MA_ = SA + 6;
+    static const Note PA = SA + 7;
+    static const Note _DHA = SA + 8;
+    static const Note DHA = SA + 9;
+    static const Note _NI = SA + 10;
+    static const Note NI = SA + 11;
 
     using Duration = uint8_t;
     static const Duration QUARTER = 0x02;
@@ -59,6 +59,7 @@ private:
         int length;
         std::vector<Event> events;
 
+        unsigned int size() const;
         void write_to(std::ofstream& file) const;
     };
 

@@ -20,20 +20,26 @@ void MidiFile::generate()
     write_tracks();
 }
 
-void MidiFile::add_note(const Note key, const int octave, const Duration duration)
+void MidiFile::add_note(const Note key,
+    const int octave,
+    const Duration duration)
 {
-    tracks[0].events.emplace_back(Event(0x00, 0x90, key + (uint8_t)(octave * 12), 0x60));
-    tracks[0].events.emplace_back(Event(duration, 0x80, key + (uint8_t)(octave * 12), 0x20));
+    // note on event
+    tracks[0].events.emplace_back(
+        Event(0x00, 0x90, key + (uint8_t)(octave * 12), 0x60));
+    // note off event
+    tracks[0].events.emplace_back(
+        Event(duration, 0x80, key + (uint8_t)(octave * 12), 0x20));
 }
 
-static void write_int_as_big_endian (unsigned int n, std::ofstream& file);
+static void write_int_as_big_endian(unsigned int n, std::ofstream& file);
 
 void MidiFile::write_header()
 {
     file.write("MThd", 4);
 
     // length
-    write_int_as_big_endian (6, file);
+    write_int_as_big_endian(6, file);
 
     // data
     // format - 2 bytes
@@ -61,7 +67,6 @@ unsigned int MidiFile::Track::size() const
     // 4 bytes for end of track event
     return 3 + events.size() * 4 + 4;
 }
-
 
 void MidiFile::Track::write_to(std::ofstream& file) const
 {
@@ -93,7 +98,7 @@ void MidiFile::Event::write_to(std::ofstream& file) const
     file.put(data2_);
 }
 
-static void write_int_as_big_endian (const unsigned int n, std::ofstream& file)
+static void write_int_as_big_endian(const unsigned int n, std::ofstream& file)
 {
     file.put((n >> 24) & 0xFF);
     file.put((n >> 16) & 0xFF);
