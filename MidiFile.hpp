@@ -7,8 +7,8 @@
 
 class MidiFile {
 public:
-    MidiFile(const char* fileName);
-    ~MidiFile();
+    MidiFile(const char* fileName, int numTracks = 1);
+    ~MidiFile() = default;
 
     using Note = uint8_t;
     static const Note SA = 0x3D; // Middle C-sharp
@@ -29,8 +29,9 @@ public:
     static const Duration HALF = 0x04;
     static const Duration ONE = 0x08;
 
-    void add_note(Note key, int octave = 0, Duration duration = ONE);
+    void add_note(Note key, int octave = 0, Duration duration = ONE, int trackNumber = 1);
     void generate();
+    void close();
 
 private:
     void write_header();
@@ -63,6 +64,7 @@ private:
         void write_to(std::ofstream& file) const;
     };
 
+    int numTracks_;
     std::ofstream file;
     std::vector<Track> tracks;
 };

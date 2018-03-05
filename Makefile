@@ -6,7 +6,7 @@ clean:
 	$(RM) generate_midi *.o out.mid
 
 %.o: %.cpp
-	$(CXX) -c -Wall -m32 -std=c++11 $< -o $@
+	$(CXX) -c -Wall -Wextra -m32 -std=c++11 $< -o $@
 
 generate_midi: generate_midi.o MidiFile.o
-	$(CXX) -Wall -m32 $^ -o $@
+	$(CXX) -Wall -Wextra -m32 $^ -o $@

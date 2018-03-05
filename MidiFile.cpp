@@ -3,15 +3,11 @@
 #include <fstream>
 #include <vector>
 
-MidiFile::MidiFile(const char* fileName)
-    : file(fileName)
-    , tracks(1)
+MidiFile::MidiFile(const char* fileName, const int numTracks)
+    : numTracks_(numTracks),
+      file(fileName)
+    , tracks(numTracks)
 {
-}
-
-MidiFile::~MidiFile()
-{
-    file.close();
 }
 
 void MidiFile::generate()
@@ -20,16 +16,24 @@ void MidiFile::generate()
     write_tracks();
 }
 
-void MidiFile::add_note(const Note key,
-    const int octave,
-    const Duration duration)
+void MidiFile::close()
 {
+    file.close();
+}
+
+void MidiFile::add_note(const Note key,
+                        const int octave,
+                        const Duration duration,
+                        const int trackNumber
+    )
+{
+    const Note adjustedKey = key + (Note)(octave * 12);
     // note on event
-    tracks[0].events.emplace_back(
-        Event(0x00, 0x90, key + (uint8_t)(octave * 12), 0x60));
+    tracks[trackNumber-1].events.emplace_back(
+        Event(0x00, 0x90, adjustedKey, 0x60));
     // note off event
-    tracks[0].events.emplace_back(
-        Event(duration, 0x80, key + (uint8_t)(octave * 12), 0x20));
+    tracks[trackNumber-1].events.emplace_back(
+        Event(duration & 0x7F, 0x80, adjustedKey, 0x20));
 }
 
 static void write_int_as_big_endian(unsigned int n, std::ofstream& file);
@@ -47,7 +51,7 @@ void MidiFile::write_header()
     file.put(0);
     // tracks - 2 bytes
     file.put(0);
-    file.put(1);
+    file.put(numTracks_);
     // division - 2 bytes
     file.put(0);
     file.put(10);

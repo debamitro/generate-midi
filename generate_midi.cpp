@@ -11,6 +11,7 @@ int main()
     midiFile.add_note(MidiFile::RE, 0, MidiFile::QUARTER);
     midiFile.add_note(MidiFile::SA, 0, MidiFile::ONE * (uint8_t)2);
     midiFile.generate();
+    midiFile.close();
 
     return 0;
 }
